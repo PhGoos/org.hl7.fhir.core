@@ -48,7 +48,7 @@ public class ProxyOptions {
 
       System.setProperty(HTTP_PROXY_USER, authUser);
       System.setProperty(HTTP_PROXY_PASS, authPass);
-      System.setProperty(JAVA_USE_SYSTEM_PROXIES, "true");
+      // System.setProperty(JAVA_USE_SYSTEM_PROXIES, "true");
 
       /*
        * For Java 1.8 and higher you must set

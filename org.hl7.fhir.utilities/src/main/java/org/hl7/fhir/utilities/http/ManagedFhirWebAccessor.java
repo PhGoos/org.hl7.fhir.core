@@ -1,5 +1,6 @@
 package org.hl7.fhir.utilities.http;
 
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.hl7.fhir.utilities.ToolingClientLogger;
 import org.hl7.fhir.utilities.http.okhttpimpl.LoggingInterceptor;
@@ -8,12 +9,14 @@ import org.hl7.fhir.utilities.http.okhttpimpl.RetryInterceptor;
 import org.hl7.fhir.utilities.settings.ServerDetailsPOJO;
 
 import java.io.IOException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class ManagedFhirWebAccessor extends ManagedWebAccessorBase<ManagedFhirWebAccessor> {
 
   /**
@@ -162,6 +165,50 @@ public class ManagedFhirWebAccessor extends ManagedWebAccessorBase<ManagedFhirWe
     if (logger != null) builder.addInterceptor(loggingInterceptor);
     builder.addInterceptor(new RetryInterceptor(retries));
     builder.proxyAuthenticator(new ProxyAuthenticator());
+    builder.proxySelector(new ProxySelector() {
+      @Override
+      public List<Proxy> select(URI uri) {
+        final List<Proxy> proxyList = new ArrayList<>();
+
+        final String host = uri.getHost();
+        final String httpProxyHost = System.getProperty("http.proxyHost");
+        final String httpProxyPort = System.getProperty("http.proxyPort");
+        final String httpsProxyHost = System.getProperty("https.proxyHost");
+        final String httpsProxyPort = System.getProperty("https.proxyPort");
+
+        if (uri.getScheme().equals("http")) {
+          if (httpProxyHost != null && httpProxyPort != null && hostNotInNoProxy(host)) {
+            proxyList.add(new Proxy(Proxy.Type.HTTP,
+              new InetSocketAddress(httpProxyHost, Integer.parseInt(httpProxyPort))));
+          }
+        }
+        if (uri.getScheme().equals("https")) {
+          if (httpsProxyHost != null && httpProxyPort != null && hostNotInNoProxy(host)) {
+            proxyList.add(new Proxy(Proxy.Type.HTTP,
+              new InetSocketAddress(httpsProxyHost, Integer.parseInt(httpsProxyPort))));
+          }
+        }
+        proxyList.add(Proxy.NO_PROXY);
+        return proxyList;
+      }
+
+      private boolean hostNotInNoProxy(String host) {
+        String nonProxyHostsString = System.getProperty("http.nonProxyHosts");
+        if (nonProxyHostsString == null) {
+          return true;
+        }
+        nonProxyHostsString = nonProxyHostsString
+          .replace(".", "\\.")
+          .replace("*", ".*");
+        List<String> nonProxyHosts = Arrays.asList(nonProxyHostsString.split("\\|"));
+        return nonProxyHosts.stream().noneMatch(host::matches);
+      }
+
+      @Override
+      public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
+        log.error("Connection to {} failed!\nProxy: {}\n{}", uri, sa, ioe.getMessage());
+      }
+    });
     return builder.connectTimeout(timeout, timeoutUnit)
       .writeTimeout(timeout, timeoutUnit)
       .readTimeout(timeout, timeoutUnit).build();
