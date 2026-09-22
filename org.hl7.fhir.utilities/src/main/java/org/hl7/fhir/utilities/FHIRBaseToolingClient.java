@@ -6,7 +6,7 @@ public class FHIRBaseToolingClient {
   private static final int DEFAULT_TIMEOUT_NORMAL = 3000;
   private static final int DEFAULT_TIMEOUT_OPERATION = 30000;
   private static final int DEFAULT_TIMEOUT_ENTRY = 500;
-  private static final int DEFAULT_TIMEOUT_OPERATION_LONG = 60000;
+  private static final int DEFAULT_TIMEOUT_OPERATION_LONG = 600000;
   private static final int DEFAULT_TIMEOUT_OPERATION_EXPAND = 120000;
 
   protected int timeoutNormal = DEFAULT_TIMEOUT_NORMAL;
