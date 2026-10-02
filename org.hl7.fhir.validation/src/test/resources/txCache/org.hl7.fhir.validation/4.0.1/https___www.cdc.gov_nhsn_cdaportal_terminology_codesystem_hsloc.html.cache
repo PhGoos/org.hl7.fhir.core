@@ -3,7 +3,7 @@
   "system" : "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
   "code" : "1258-3",
   "display" : "Long Term Care Facility General Nursing Unit"
-}, "valueSet" :null, "langs":"en-US", "useServer":"true", "useClient":"true", "guessSystem":"false", "noAbstract":"false", "activeOnly":"false", "membershipOnly":"false", "displayWarningMode":"false", "versionFlexible":"false", "profile": {
+}, "valueSet" :null, "langs":"en-US", "useServer":"true", "useClient":"true", "guessSystem":"false", "noAbstract":"false", "activeOnly":"false", "membershipOnly":"false", "displayWarningMode":"false", "versionFlexible":"false", "useValueSetDisplays":"true", "profile": {
   "resourceType" : "Parameters",
   "parameter" : [{
     "name" : "profile-url",
